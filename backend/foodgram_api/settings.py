@@ -6,7 +6,9 @@ SECRET_KEY = 'rg-0(_o_nwg=cgzlq_@t7d4%9-()yp=ufjvq=c=*v2(ybwhf^3'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*',
+                 '84.201.175.116',
+                 'backend']
 
 
 INSTALLED_APPS = [
