@@ -7,6 +7,7 @@ volumes:
   media_value:
 
 services:
+
   db:
     image: postgres:12.4
     volumes:
