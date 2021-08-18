@@ -1,10 +1,10 @@
 version: '3.3'
 
 volumes:
-  result_build:
   postgres_data:
   static_value:
   media_value:
+  frontend_data:
 
 services:
 
