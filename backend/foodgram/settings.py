@@ -7,7 +7,7 @@ SECRET_KEY = 'rg-0(_o_nwg=cgzlq_@t7d4%9-()yp=ufjvq=c=*v2(ybwhf^3'
 DEBUG = False
 
 ALLOWED_HOSTS = ['*',
-                 '84.201.175.116',
+                 '178.154.254.55',
                  'backend']
 
 
@@ -36,7 +36,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'foodgram_api.urls'
+ROOT_URLCONF = 'foodgram.urls'
 
 TEMPLATES = [
     {
@@ -54,7 +54,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'foodgram_api.wsgi.application'
+WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
 # DATABASES = {
