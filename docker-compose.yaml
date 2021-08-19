@@ -9,7 +9,7 @@ services:
       - ./.env
 
   frontend:
-    image: xelam11/foodgram_frontend
+    image: xelam11/foodgram_frontend:v1.0
     volumes:
       - result_build:/app/result_build/build
 
