@@ -4,8 +4,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'rg-0(_o_nwg=cgzlq_@t7d4%9-()yp=ufjvq=c=*v2(ybwhf^3'
 
-DEBUG = False
-
+DEBUG = True
 ALLOWED_HOSTS = ['*',
                  '178.154.254.55',
                  'backend']
