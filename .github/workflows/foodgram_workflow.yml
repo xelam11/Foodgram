@@ -1,6 +1,6 @@
 name: Foodgram workflow
 
-on: push
+on: [push]
 
 jobs:
   tests:
@@ -42,7 +42,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
         passphrase: ${{ secrets.PASSPHRASE }}
         stack_file_name: docker-compose.yaml
         script: |
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
           sudo docker-compose stop
           sudo docker-compose rm backend
           touch .env
