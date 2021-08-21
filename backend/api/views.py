@@ -16,7 +16,7 @@ from .permissions import AdminOrAuthorOrReadOnly
 from .serializers import (AddFavouriteRecipeSerializer, CreateRecipeSerializer,
                           IngredientSerializer, ListRecipeSerializer,
                           ShowFollowersSerializer, TagSerializer,
-                          UserSerializer)
+                          ShoppingListRecipeSerializer, UserSerializer)
 from users.models import CustomUser
 
 
@@ -129,7 +129,7 @@ class ShoppingListViewSet(APIView):
                 'Вы уже добавили рецепт в список покупок',
                 status=status.HTTP_400_BAD_REQUEST)
         ShoppingList.objects.create(user=user, recipe=recipe)
-        serializer = AddFavouriteRecipeSerializer(recipe)
+        serializer = ShoppingListRecipeSerializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED)
