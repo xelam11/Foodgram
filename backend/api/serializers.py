@@ -1,10 +1,8 @@
 from djoser.serializers import UserSerializer as BaseUserSerializer
-from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from .models import (Favorite, Follow, Ingredient,
                      IngredientInRecipe, Recipe, ShoppingList, Tag)
-from users.models import CustomUser
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -84,8 +82,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def get_author(self, recipe):
-        # To fix import order with RecipeSerializer.
-        # RecipeSerializer uses UserSerializer and vice versa.
         return UserSerializer(user=recipe.author).data
 
     def get_is_favorited(self, recipe):
