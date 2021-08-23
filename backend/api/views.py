@@ -13,10 +13,7 @@ from .models import (Favorite, Follow, Ingredient,
                      IngredientInRecipe, Recipe, ShoppingList, Tag)
 from .paginators import PageNumberPaginatorModified
 from .permissions import AdminOrAuthorOrReadOnly
-from .serializers import (AddFavouriteRecipeSerializer, CreateRecipeSerializer,
-                          IngredientSerializer, ListRecipeSerializer,
-                          ShowFollowersSerializer, TagSerializer,
-                          ShoppingListRecipeSerializer, UserSerializer)
+from .serializers import (IngredientSerializer, TagSerializer, UserSerializer, RecipeSerializer)
 from users.models import CustomUser
 
 
@@ -38,15 +35,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = [DjangoFilterBackend,]
     filter_class = RecipeFilter
     pagination_class = PageNumberPaginatorModified
     permission_classes = [AdminOrAuthorOrReadOnly, ]
-
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return ListRecipeSerializer
-        return CreateRecipeSerializer
+    serializer_class = RecipeSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -61,8 +54,8 @@ def showfollows(request):
     paginator = PageNumberPagination()
     paginator.page_size = 10
     result_page = paginator.paginate_queryset(user_obj, request)
-    serializer = ShowFollowersSerializer(
-        result_page, many=True, context={'current_user': request.user})
+    serializer = UserSerializer(
+        result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
 
@@ -100,7 +93,7 @@ class FavouriteViewSet(APIView):
                 'Вы уже добавили рецепт в избранное',
                 status=status.HTTP_400_BAD_REQUEST)
         Favorite.objects.create(user=user, recipe=recipe)
-        serializer = AddFavouriteRecipeSerializer(recipe)
+        serializer = RecipeSerializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED)
@@ -129,7 +122,7 @@ class ShoppingListViewSet(APIView):
                 'Вы уже добавили рецепт в список покупок',
                 status=status.HTTP_400_BAD_REQUEST)
         ShoppingList.objects.create(user=user, recipe=recipe)
-        serializer = ShoppingListRecipeSerializer(recipe)
+        serializer = RecipeSerializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED)
