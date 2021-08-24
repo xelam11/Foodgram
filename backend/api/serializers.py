@@ -200,20 +200,6 @@ class UserSerializer(BaseUserSerializer):
         return user.recipes.count()
 
 
-# class ShowFollowersSerializer(serializers.ModelSerializer):
-
-#     def check_if_subscribed(self, user):
-#         current_user = self.context.get('current_user')
-#         other_user = user.following.all()
-#         if user.is_anonymous:
-#             return False
-#         if other_user.count() == 0:
-#             return False
-#         if Follow.objects.filter(user=user, author=current_user).exists():
-#             return True
-#         return False
-
-
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:

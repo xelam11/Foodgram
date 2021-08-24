@@ -97,25 +97,6 @@ class FollowViewSet(viewsets.GenericViewSet):
 
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    # def get(self, request, user_id):
-    #     user = request.user
-    #     author = get_object_or_404(CustomUser, id=user_id)
-    #     if Follow.objects.filter(user=user, author=author).exists():
-    #         return Response(
-    #             'Вы уже подписаны',
-    #             status=status.HTTP_400_BAD_REQUEST)
-    #     Follow.objects.create(user=user, author=author)
-    #     serializer = UserSerializer(author)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # def delete(self, request, user_id):
-    #     user = request.user
-    #     author = get_object_or_404(CustomUser, id=user_id)
-    #     follow = get_object_or_404(Follow, user=user, author=author)
-    #     follow.delete()
-    #     return Response('Удалено',
-    #                     status=status.HTTP_204_NO_CONTENT)
-
 
 class FavouriteViewSet(APIView):
     permission_classes = (IsAuthenticated, )
