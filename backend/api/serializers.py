@@ -152,7 +152,16 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         tags_data = TagSerializer(instance.tags.all(), many=True).data
-        return {**data, 'tags': tags_data}
+
+        ings = instance.ingredientinrecipe_set.prefetch_related('ingredient').all() # noqa
+        ingredients_data = [
+            {
+                **IngredientSerializer(ingredient_in_recipe.ingredient).data,
+                'amount': ingredient_in_recipe.amount
+            } for ingredient_in_recipe in ings
+        ]
+
+        return {**data, 'tags': tags_data, 'ingredients': ingredients_data}
 
 
 class UserSerializer(BaseUserSerializer):
@@ -174,7 +183,7 @@ class UserSerializer(BaseUserSerializer):
         ]
 
     def __init__(self, *args, **kwargs):
-        omit = kwargs.pop('omit') or []
+        omit = kwargs.pop('omit', [])
         super().__init__(*args, **kwargs)
         for field in omit:
             del self.fields[field]
