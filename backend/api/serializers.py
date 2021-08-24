@@ -1,5 +1,6 @@
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
 
 from .models import (Favorite, Follow, Ingredient,
                      IngredientInRecipe, Recipe, ShoppingList, Tag)
@@ -56,9 +57,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True)
-    image = serializers.ImageField(
+    image = Base64ImageField(
         max_length=None,
-        required=False,
+        required=True,
         allow_empty_file=False,
         use_url=True,
     )
@@ -82,7 +83,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def get_author(self, recipe):
-        return UserSerializer(user=recipe.author).data
+        return UserSerializer(recipe.author, omit=['recipes']).data
 
     def get_is_favorited(self, recipe):
         request = self.context.get('request')
@@ -171,6 +172,12 @@ class UserSerializer(BaseUserSerializer):
             'recipes',
             'recipes_count',
         ]
+
+    def __init__(self, *args, **kwargs):
+        omit = kwargs.pop('omit') or []
+        super().__init__(*args, **kwargs)
+        for field in omit:
+            del self.fields[field]
 
     def get_is_subscribed(self, user):
         request = self.context.get('request')
