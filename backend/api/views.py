@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -43,18 +43,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
 
 
-@api_view(['GET', ])
-@permission_classes([IsAuthenticated])
-def showfollows(request):
-    user_obj = CustomUser.objects.filter(following__user=request.user)
-    paginator = PageNumberPagination()
-    paginator.page_size = 10
-    result_page = paginator.paginate_queryset(user_obj, request)
-    serializer = UserSerializer(
-        result_page, many=True)
-    return paginator.get_paginated_response(serializer.data)
-
-
 class FollowViewSet(viewsets.GenericViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = (IsAuthenticated,)
@@ -77,13 +65,15 @@ class FollowViewSet(viewsets.GenericViewSet):
         if request.method == 'GET':
             author = self.get_object()
             if Follow.objects.filter(user=user, author=author).exists():
-                return Response('Вы уже подписаны',
-                                status=status.HTTP_400_BAD_REQUEST)
+
+                return Response({
+                    'message': 'Вы уже подписаны',
+                    'status': f'{status.HTTP_400_BAD_REQUEST}'
+                })
 
             Follow.objects.create(user=user, author=author)
-            serializer = UserSerializer(author)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
             count, _ = Follow.objects.filter(
@@ -93,7 +83,10 @@ class FollowViewSet(viewsets.GenericViewSet):
             if count == 0:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
-            return Response('Удалено', status=status.HTTP_204_NO_CONTENT)
+            return Response({
+                'message': 'Удалено',
+                'status': f'{status.HTTP_204_NO_CONTENT}'
+            })
 
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -106,16 +99,13 @@ class FavouriteViewSet(APIView):
         recipe = get_object_or_404(Recipe, id=recipe_id)
         _, is_created = Favorite.objects.get_or_create(user=user,
                                                        recipe=recipe)
-
         if not is_created:
-            return Response(
-                'Вы уже добавили рецепт в избранное',
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'message': 'Вы уже добавили рецепт в избранное',
+                'status': f'{status.HTTP_400_BAD_REQUEST}'
+            })
 
-        serializer = RecipeSerializer(recipe)
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
 
     def delete(self, request, recipe_id):
         user = request.user
@@ -126,12 +116,15 @@ class FavouriteViewSet(APIView):
             user=user).delete()
 
         if count == 0:
-            return Response(
-                'Рецепт не был в избранном',
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'message': 'Рецепт не был в избранном',
+                'status': f'{status.HTTP_400_BAD_REQUEST}'
+            })
 
-        return Response(
-            'Удалено', status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            'message': 'Удалено',
+            'status': f'{status.HTTP_204_NO_CONTENT}'
+        })
 
 
 class ShoppingListViewSet(APIView):
@@ -141,9 +134,10 @@ class ShoppingListViewSet(APIView):
         user = request.user
         recipe = get_object_or_404(Recipe, id=recipe_id)
         if ShoppingList.objects.filter(user=user, recipe=recipe).exists():
-            return Response(
-                'Вы уже добавили рецепт в список покупок',
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'message': 'Вы уже добавили рецепт в список покупок',
+                'status': f'{status.HTTP_400_BAD_REQUEST}'
+            })
         ShoppingList.objects.create(user=user, recipe=recipe)
         serializer = RecipeSerializer(recipe)
         return Response(
@@ -156,12 +150,15 @@ class ShoppingListViewSet(APIView):
         shopping_list_obj = get_object_or_404(
             ShoppingList, user=user, recipe=recipe)
         if not shopping_list_obj:
-            return Response(
-                'Рецепт не был в списке покупок',
-                status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'message': 'Рецепт не был в списке покупок',
+                'status': f'{status.HTTP_400_BAD_REQUEST}'
+            })
         shopping_list_obj.delete()
-        return Response(
-            'Удалено', status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            'message': 'Удалено',
+            'status': f'{status.HTTP_204_NO_CONTENT}'
+        })
 
 
 class DownloadShoppingCart(APIView):
