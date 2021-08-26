@@ -64,14 +64,13 @@ class FollowViewSet(viewsets.GenericViewSet):
 
         if request.method == 'GET':
             author = self.get_object()
-            if Follow.objects.filter(user=user, author=author).exists():
-
+            _, is_created = Follow.objects.get_or_create(user=user,
+                                                         author=author)
+            if not is_created:
                 return Response({
                     'message': 'Вы уже подписаны',
-                    'status': f'{status.HTTP_400_BAD_REQUEST}'
-                })
-
-            Follow.objects.create(user=user, author=author)
+                    'status': 'error'},
+                    status=status.HTTP_400_BAD_REQUEST)
 
             return Response(status=status.HTTP_201_CREATED)
 
@@ -81,12 +80,15 @@ class FollowViewSet(viewsets.GenericViewSet):
                 user=user).delete()
 
             if count == 0:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    'message': 'Не было подписки на данного пользователя',
+                    'status': 'error'},
+                    status=status.HTTP_404_NOT_FOUND)
 
             return Response({
                 'message': 'Удалено',
-                'status': f'{status.HTTP_204_NO_CONTENT}'
-            })
+                'status': 'ok'},
+                status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -102,8 +104,8 @@ class FavouriteViewSet(APIView):
         if not is_created:
             return Response({
                 'message': 'Вы уже добавили рецепт в избранное',
-                'status': f'{status.HTTP_400_BAD_REQUEST}'
-            })
+                'status': 'error'},
+                status=status.HTTP_400_BAD_REQUEST)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -118,13 +120,13 @@ class FavouriteViewSet(APIView):
         if count == 0:
             return Response({
                 'message': 'Рецепт не был в избранном',
-                'status': f'{status.HTTP_400_BAD_REQUEST}'
-            })
+                'status': 'error'},
+                status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             'message': 'Удалено',
-            'status': f'{status.HTTP_204_NO_CONTENT}'
-        })
+            'status': 'ok'},
+            status=status.HTTP_204_NO_CONTENT)
 
 
 class ShoppingListViewSet(APIView):
@@ -133,12 +135,14 @@ class ShoppingListViewSet(APIView):
     def get(self, request, recipe_id):
         user = request.user
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        if ShoppingList.objects.filter(user=user, recipe=recipe).exists():
+        _, is_created = ShoppingList.objects.get_or_create(user=user,
+                                                           recipe=recipe)
+        if not is_created:
             return Response({
                 'message': 'Вы уже добавили рецепт в список покупок',
-                'status': f'{status.HTTP_400_BAD_REQUEST}'
-            })
-        ShoppingList.objects.create(user=user, recipe=recipe)
+                'status': 'error'},
+                status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RecipeSerializer(recipe)
         return Response(
             serializer.data,
@@ -147,18 +151,20 @@ class ShoppingListViewSet(APIView):
     def delete(self, request, recipe_id):
         user = request.user
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        shopping_list_obj = get_object_or_404(
-            ShoppingList, user=user, recipe=recipe)
-        if not shopping_list_obj:
+        count, _ = ShoppingList.objects.filter(
+            recipe=recipe,
+            user=user).delete()
+
+        if count == 0:
             return Response({
                 'message': 'Рецепт не был в списке покупок',
-                'status': f'{status.HTTP_400_BAD_REQUEST}'
-            })
-        shopping_list_obj.delete()
+                'status': 'error'},
+                status=status.HTTP_400_BAD_REQUEST)
+
         return Response({
             'message': 'Удалено',
-            'status': f'{status.HTTP_204_NO_CONTENT}'
-        })
+            'status': 'ok'},
+            status=status.HTTP_204_NO_CONTENT)
 
 
 class DownloadShoppingCart(APIView):
